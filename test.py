@@ -1,99 +1,136 @@
-# Please ensure Streamlit is installed using:
-# pip install streamlit
-
 import streamlit as st
 import pandas as pd
+from datetime import date
 
-st.set_page_config(page_title='Umrah Travel Agency', layout='wide')
+# Streamlit App configuration
+st.set_page_config(
+    page_title="Umrah Travel Agency",
+    page_icon="🕋",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-# Sidebar navigation
-st.sidebar.title('Navigation')
-menu = st.sidebar.radio('', [
-    'Home', 'Packages', 'Book Package', 'My Bookings', 'User Profile', 'Admin Panel', 'Contact Support'
-])
+# CSS Styling for modern UI
+st.markdown("""
+<style>
+    .main {
+        background-color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .sidebar .sidebar-content {
+        background-color: #f5f5f5;
+    }
+    h1, h2, h3 {
+        color: #333;
+    }
+    button {
+        background-color: #007BFF !important;
+        color: white !important;
+        border-radius: 8px !important;
+    }
+    button:hover {
+        background-color: #0056b3 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Dummy data for packages
 packages = pd.DataFrame({
-    'Package Name': ['Economy Package', 'Deluxe Package', 'Premium Package'],
+    'Package Name': ['Economy', 'Deluxe', 'Premium'],
     'Price (USD)': [1200, 2000, 3500],
-    'Hotel': ['Makkah Hotel 3-star', 'Makkah Hotel 4-star', 'Makkah Hotel 5-star'],
+    'Hotel': ['3-Star', '4-Star', '5-Star'],
     'Duration (days)': [7, 10, 14],
     'Transport': ['Bus', 'Private Car', 'Luxury Car'],
-    'Meals Included': ['Breakfast', 'Breakfast & Dinner', 'All meals']
 })
 
-if menu == 'Home':
-    st.title('Umrah Travel Agency')
-    st.image('https://example.com/banner.jpg', use_column_width=True)
-    st.markdown("""
-        Welcome to **Umrah Travel Agency**, your trusted partner for a comfortable and spiritually enriching Umrah journey.
+# Sidebar navigation
+menu = st.sidebar.radio('Menu', [
+    '🏠 Home',
+    '📦 Packages',
+    '📝 Book Package',
+    '📖 My Bookings',
+    '👤 User Profile',
+    '⚙️ Admin Panel',
+    '📞 Support'
+])
 
-        ### Explore our services:
-        - Comprehensive travel packages
-        - Hassle-free bookings
-        - Dedicated customer support
-    """)
+# Home Page
+if menu == '🏠 Home':
+    st.title('🕋 Umrah Travel Agency')
+    st.write("Welcome to your trusted partner for your spiritual journey.")
+    st.image("https://images.unsplash.com/photo-1585409164169-43e1db9ed48e?auto=format&fit=crop&w=1350&q=80",
+             caption="Experience tranquility and spirituality with us.", use_container_width=True)
 
-elif menu == 'Packages':
-    st.title('Available Umrah Packages')
-    st.table(packages)
+# Packages Page
+elif menu == '📦 Packages':
+    st.title('📦 Available Umrah Packages')
+    st.dataframe(packages, use_container_width=True)
 
-elif menu == 'Book Package':
-    st.title('Book Your Umrah Package')
+# Book Package Page
+elif menu == '📝 Book Package':
+    st.title('📝 Book Your Umrah Package')
+    package_selected = st.selectbox('Select Package', packages['Package Name'])
+    traveler_name = st.text_input('Full Name')
+    passport_number = st.text_input('Passport Number')
+    nationality = st.text_input('Nationality')
+    email = st.text_input('Email')
+    phone = st.text_input('Phone Number')
+    travel_date = st.date_input('Travel Date', min_value=date.today())
 
-    col1, col2 = st.columns(2)
+    docs_uploaded = st.file_uploader('Upload Required Documents', accept_multiple_files=True)
 
-    with col1:
-        package_selected = st.selectbox('Select Package', packages['Package Name'])
-        traveler_name = st.text_input('Full Name')
-        passport_number = st.text_input('Passport Number')
-        nationality = st.text_input('Nationality')
-        travel_date = st.date_input('Preferred Travel Date')
-
-    with col2:
-        email = st.text_input('Email')
-        phone = st.text_input('Phone Number')
-        uploaded_files = st.file_uploader('Upload Documents (Passport, Visa, Vaccination)', accept_multiple_files=True)
-        payment_method = st.selectbox('Payment Method', ['Credit Card', 'Debit Card', 'Bank Transfer'])
+    payment_method = st.selectbox('Payment Method', ['Credit Card', 'Debit Card', 'Bank Transfer'])
 
     if st.button('Confirm Booking'):
-        st.success(f'Booking confirmed for {traveler_name} ({package_selected}) on {travel_date}')
+        if traveler_name and passport_number and email:
+            st.success(f'Booking confirmed for {traveler_name}! You chose the {package_selected} package on {travel_date}.')
+        else:
+            st.error('Please fill in all required fields.')
 
-elif menu == 'My Bookings':
-    st.title('My Bookings')
-    st.info('Your bookings will be displayed here once connected to a database.')
+# My Bookings Page
+elif menu == '📖 My Bookings':
+    st.title('📖 My Bookings')
+    st.info('Bookings will be displayed here after database integration.')
 
-elif menu == 'User Profile':
-    st.title('User Profile')
-    name = st.text_input('Name', 'John Doe')
-    passport_num = st.text_input('Passport Number', 'A12345678')
-    nationality = st.text_input('Nationality', 'Country')
-    phone_number = st.text_input('Phone Number', '+1234567890')
-    email_address = st.text_input('Email', 'john.doe@example.com')
+# User Profile Page
+elif menu == '👤 User Profile':
+    st.title('👤 User Profile')
+    with st.form('update_profile'):
+        name = st.text_input('Name')
+        passport = st.text_input('Passport Number')
+        nationality = st.text_input('Nationality')
+        phone = st.text_input('Phone Number')
+        email = st.text_input('Email')
+        submitted = st.form_submit_button('Update Profile')
+        if submitted:
+            st.success('Profile updated successfully!')
 
-    if st.button('Update Profile'):
-        st.success('Profile updated successfully!')
-
-elif menu == 'Admin Panel':
-    st.title('Admin Panel')
-
-    admin_menu = st.sidebar.selectbox('Admin Menu', ['Manage Packages', 'View Reports', 'User Management'])
+# Admin Panel Page
+elif menu == '⚙️ Admin Panel':
+    st.title('⚙️ Admin Panel')
+    admin_menu = st.selectbox('Admin Options', ['Manage Packages', 'View Reports', 'User Management'])
 
     if admin_menu == 'Manage Packages':
-        st.subheader('Package Management')
-        st.write('Add, update, or remove packages here.')
+        st.subheader('Manage Packages')
+        st.info('Package management functionalities go here.')
 
     elif admin_menu == 'View Reports':
         st.subheader('Reports & Analytics')
-        st.write('View booking reports, analytics, and user activities.')
+        st.info('Booking analytics and reports will be displayed here.')
 
     elif admin_menu == 'User Management':
-        st.subheader('Manage Users')
-        st.write('Create, update, or deactivate user accounts.')
+        st.subheader('User Management')
+        st.info('User account management functionalities go here.')
 
-elif menu == 'Contact Support':
-    st.title('Contact Customer Support')
-    issue = st.text_area('Describe Your Issue')
-    contact_email = st.text_input('Your Email')
-    if st.button('Submit Issue'):
-        st.success('Issue submitted! Our support team will contact you shortly.')
+# Support Page
+elif menu == '📞 Support':
+    st.title('📞 Customer Support')
+    with st.form('support_form'):
+        issue = st.text_area('Describe your issue', height=150)
+        submitted = st.form_submit_button('Submit Issue')
+        if submitted:
+            st.success('Your issue has been submitted. Our support team will contact you shortly.')
+
+# Footer
+st.markdown('---')
+st.markdown('© 2025 Umrah Travel Agency | All Rights Reserved', unsafe_allow_html=True)
